@@ -132,3 +132,12 @@ for k, v in checks.items():
     print(f"  [{'PASS' if v else 'FAIL'}] {k}")
 assert all(checks.values()), "NB3 incomplete — see FAIL rows above"
 print("\nNB3 complete.")
+
+# %% [markdown]
+# ## Nhận xét kết quả
+#
+# Time travel chỉ đọc snapshot cũ cho một truy vấn; nó không thay đổi trạng thái
+# hiện tại. `RESTORE` thì tạo một version mới có nội dung logic giống version 2,
+# vì vậy reader hiện tại không còn thấy dòng `score < 0`. Việc ghi thêm một
+# transaction thay vì xóa lịch sử giữ audit trail bất biến, hỗ trợ điều tra và
+# cho phép các reader đang pin version cũ tiếp tục hoạt động trong retention window.

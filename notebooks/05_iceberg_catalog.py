@@ -299,3 +299,13 @@ for k, v in checks.items():
     print(f"  [{'PASS' if v else 'FAIL'}] {k}")
 assert all(checks.values()), "NB5 incomplete — see FAIL rows above"
 print("\nNB5 complete.")
+
+# %% [markdown]
+# ## Nhận xét kết quả
+#
+# Hidden partitioning biến predicate trên cột nguồn `ts` thành predicate trên transform
+# `day(ts)` trong scan planning; người dùng không phải nhớ một cột partition phụ.
+# Iceberg nhận diện field bằng ID nên rename `latency_ms` thành `latency_millis`
+# không làm cột cũ trở thành cột mới. Khi partition spec thay đổi, mỗi data
+# file vẫn mang `spec_id` dùng lúc ghi; planner hiểu nhiều spec cùng lúc, do đó
+# file cũ không phải rewrite ngay và toàn bộ bảng vẫn đọc nhất quán.

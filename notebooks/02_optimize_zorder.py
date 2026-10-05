@@ -176,3 +176,13 @@ print(f"\n  (speedup={speedup:.1f}x, pruning={pruned_ratio:.1f}x — the slide a
 print("   wall-clock is noisy on a laptop, which is why file-pruning is the fallback.)")
 assert all(checks.values()), "NB2 incomplete — see FAIL rows above"
 print("\nNB2 complete.")
+
+# %% [markdown]
+# ## Nhận xét kết quả
+#
+# Compaction giảm chi phí mở và lập kế hoạch nhiều file nhỏ; Z-order sắp xếp
+# các giá trị gần nhau để min/max statistics có thể loại file không liên quan.
+# Nếu compaction gộp toàn bộ bảng thành một file, point query vẫn phải mở file
+# duy nhất đó, nên không còn file-level pruning để quan sát. Wall-clock thay đổi
+# theo page cache, SSD, CPU và tiến trình nền; vì vậy bài báo cáo cả median và
+# pruning ratio, trong đó pruning ratio là bằng chứng ổn định hơn cho cơ chế.

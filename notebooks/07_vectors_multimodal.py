@@ -403,3 +403,13 @@ for k, v in checks.items():
     print(f"  [{'PASS' if v else 'FAIL'}] {k}")
 assert all(checks.values()), "NB7 incomplete — see FAIL rows above"
 print("\nNB7 complete.")
+
+# %% [markdown]
+# ## Nhận xét kết quả
+#
+# Quantization int8 giảm dung lượng xấp xỉ bốn lần so với float32 nhưng làm mất
+# một phần độ chính xác. Recall@10 theo doc ID phạt mọi thay thế ID, kể cả khi
+# tài liệu thay thế cùng chủ đề; topic fidelity chỉ đo kết quả có còn đúng
+# ngữ nghĩa cho RAG hay không. Lifecycle bug cho thấy external index là derived state:
+# nó phải tiêu thụ cả insert/update lẫn delete CDF, idempotent theo version, thì mới
+# ngừng trả về vector của dữ liệu đã bị xóa khỏi system of record.

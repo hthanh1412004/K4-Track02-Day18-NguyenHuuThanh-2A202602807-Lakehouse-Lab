@@ -438,3 +438,13 @@ for k, v in checks.items():
     print(f"  [{'PASS' if v else 'FAIL'}] {k}")
 assert all(checks.values()), "NB6 incomplete — see FAIL rows above"
 print("\nNB6 complete.")
+
+# %% [markdown]
+# ## Nhận xét kết quả
+#
+# Delta VACUUM xuất phát từ tombstone trong transaction log; file do writer ghi nhưng
+# crash trước commit chưa từng xuất hiện trong log, nên cần một orphan sweep có age
+# guard riêng. Trong đường PyIceberg được đo, expire snapshot chỉ thay metadata;
+# manifest list và data file vật lý cần bước orphan removal sau đó. Retention quá
+# ngắn có thể xóa file mà reader cũ hoặc job đang pin version còn cần, làm time
+# travel thất bại; vì vậy retention 0 chỉ an toàn trong scratch table của lab.

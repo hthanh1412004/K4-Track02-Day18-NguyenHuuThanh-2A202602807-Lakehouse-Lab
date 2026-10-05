@@ -479,3 +479,14 @@ for k, v in checks.items():
     print(f"  [{'PASS' if v else 'FAIL'}] {k}")
 assert all(checks.values()), "NB8 incomplete — see FAIL rows above"
 print("\nNB8 complete.")
+
+# %% [markdown]
+# ## Nhận xét kết quả
+#
+# Pin table version gắn training run với một snapshot cụ thể, tránh việc dữ liệu
+# append sau đó làm replay thay đổi. Xóa subject ở version hiện tại tạo transaction
+# mới; bản cũ còn có thể time travel cho tới khi retention/vacuum loại file vật lý.
+# Lớp MCP trong bài chỉ là mô phỏng offline: `confirmed` do caller tự truyền, task
+# không chạy trên backend thật, cache không phải `tools/list`, replay chỉ so số bước,
+# và mapping provenance không chứng minh quyền pháp lý. Production cần identity,
+# authorization, durable task state, audit log và policy enforcement độc lập với agent.

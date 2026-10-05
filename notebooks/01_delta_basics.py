@@ -48,6 +48,32 @@ for h in dt.history():
     print(f"  v{h['version']}  {h['operation']}  {h.get('operationMetrics', {})}")
 
 # %% [markdown]
+# ### Bằng chứng commit JSON
+#
+# Mỗi dòng trong commit là một action. Commit đầu tiên cho thấy protocol,
+# metadata/schema, file Parquet được `add` và thông tin commit.
+
+# %%
+import json
+from pathlib import Path
+
+commit_files = sorted(Path(table_path).glob("_delta_log/*.json"))
+first_commit = commit_files[0]
+print(f"Commit file: {first_commit.name}")
+with first_commit.open(encoding="utf-8") as fh:
+    for line in fh:
+        action = json.loads(line)
+        action_name = next(iter(action))
+        payload = action[action_name]
+        if action_name == "metaData":
+            print(f"  metaData.schemaString: {payload['schemaString']}")
+        elif action_name == "add":
+            print(f"  add.path: {payload['path']}")
+            print(f"  add.size: {payload['size']} bytes")
+        else:
+            print(f"  {action_name}: {json.dumps(payload, ensure_ascii=False)[:300]}")
+
+# %% [markdown]
 # ## 3. Schema enforcement — try to write a wrong schema
 
 # %%
@@ -110,3 +136,13 @@ for k, v in checks.items():
     print(f"  [{'PASS' if v else 'FAIL'}] {k}")
 assert all(checks.values()), "NB1 incomplete — see FAIL rows above"
 print("\nNB1 complete.")
+
+# %% [markdown]
+# ## Nhận xét kết quả
+#
+# Schema enforcement kiểm tra dữ liệu ghi mới theo schema đang có, vì vậy giá trị
+# `age="thirty"` bị chặn trước khi làm bẩn bảng. Schema evolution lại là thay đổi
+# hợp đồng dữ liệu; `schema_mode="merge"` thể hiện sự chấp thuận tường minh cho
+# cột `tier`. Cơ chế opt-in ngăn schema drift âm thầm làm hỏng các consumer cũ.
+# Mỗi commit JSON ghi metadata, protocol và các action `add`/`remove`, nhờ đó có
+# thể xác định file nào thuộc một lần ghi và audit lịch sử thay đổi.

@@ -155,3 +155,13 @@ assert n_dates >= 7, (
 # - [ ] Silver has fewer rows than Bronze (dedup worked)
 # - [ ] Gold spans ≥ 7 dates × 3 models (slide §8 medallion contract)
 # - [ ] Cost & error_rate columns populated and non-zero
+
+# %% [markdown]
+# ## Nhận xét kết quả
+#
+# Bronze giữ payload thô để có thể replay; Silver parse kiểu và khử các retry
+# trùng `request_id`, nhờ đó mỗi request chỉ được tính một lần. Dashboard đọc
+# Gold vì metric đã được tổng hợp theo ngày/model, tránh parse JSON và quét
+# chi tiết cho mỗi lần refresh. `error_rate` là tỷ lệ các status khác `ok` trên
+# Silver đã dedup; `cost_usd` nhân tổng token với bảng giá minh họa. Cách tính
+# phù hợp schema giả lập, nhưng không nên xem bảng giá này là billing thực tế.
